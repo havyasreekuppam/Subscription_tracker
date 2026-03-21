@@ -5,7 +5,11 @@ const subscriptionSchema = new mongoose.Schema({
     cost: Number,
     billingCycle: String,
     nextBillingDate: Date,
-    category: String
+    category: String,
+    userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }
 });
 
 module.exports = mongoose.model("Subscription", subscriptionSchema);
