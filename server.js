@@ -24,11 +24,13 @@ app.get("/", (req, res) => {
 
 
 const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
+  if (!authHeader) {
     return res.status(401).json({ message: "No token" });
   }
+
+  const token = authHeader.split(" ")[1]; // ✅ IMPORTANT
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -38,7 +40,6 @@ const authMiddleware = (req, res, next) => {
     res.status(401).json({ message: "Invalid token" });
   }
 };
-
 
 
 
@@ -117,7 +118,10 @@ app.get("/api/subscriptions", authMiddleware, async (req, res) => {
 
 app.get("/api/subscriptions/:id", authMiddleware, async (req, res) => {
   try {
-    const subscription = await Subscription.findById(req.params.id);
+    const subscription = await Subscription.findById({
+      _id: req.params.id,
+      userId: req.user.userId
+    });
 
     if (!subscription) {
       return res.status(404).json({ message: "Subscription not found" });
