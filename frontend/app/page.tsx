@@ -18,17 +18,15 @@ function DashboardContent() {
 
   const stats = useMemo(() => {
     const activeSubscriptions = subscriptions.filter(s => s.status === 'active')
+
     const monthlySpending = activeSubscriptions.reduce((acc, sub) => {
-      if (sub.billingCycle === 'monthly') {
-        return acc + sub.price
-      }
+      if (sub.billingCycle === 'monthly') return acc + sub.price
       return acc + sub.price / 12
     }, 0)
-    const yearlySpending = monthlySpending * 12
 
     return {
       monthlySpending,
-      yearlySpending,
+      yearlySpending: monthlySpending * 12,
       activeCount: activeSubscriptions.length,
     }
   }, [subscriptions])
@@ -36,7 +34,7 @@ function DashboardContent() {
   const upcomingPayments = useMemo(() => {
     const today = new Date()
     const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-    
+
     return subscriptions
       .filter(sub => {
         const billingDate = new Date(sub.nextBillingDate)
@@ -61,20 +59,23 @@ function DashboardContent() {
 
   const handleFormClose = (open: boolean) => {
     setFormOpen(open)
-    if (!open) {
-      setEditingSubscription(null)
-    }
+    if (!open) setEditingSubscription(null)
   }
 
   return (
     <div className="space-y-6">
+
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Track and manage your subscriptions</p>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-white/60">Track and manage your subscriptions</p>
         </div>
-        <Button onClick={() => setFormOpen(true)} className="gap-2">
+
+        <Button 
+          onClick={() => setFormOpen(true)} 
+          className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90"
+        >
           <Plus className="h-4 w-4" />
           Add Subscription
         </Button>
@@ -82,108 +83,115 @@ function DashboardContent() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
+
+        {/* Monthly */}
+        <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl shadow-lg hover:scale-[1.02] transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Monthly Spending
-            </CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm text-white/60">Monthly Spending</CardTitle>
+            <CreditCard className="h-4 w-4 text-white/60" />
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">
+
+          <CardContent>
+            <div className="text-2xl font-bold text-white">
               ${stats.monthlySpending.toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-success">+2.5%</span> from last month
+            <p className="text-xs text-white/60">
+              <span className="text-green-400">+2.5%</span> from last month
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Yearly */}
+        <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl shadow-lg hover:scale-[1.02] transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Yearly Spending
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm text-white/60">Yearly Spending</CardTitle>
+            <TrendingUp className="h-4 w-4 text-white/60" />
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">
+
+          <CardContent>
+            <div className="text-2xl font-bold text-white">
               ${stats.yearlySpending.toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Projected annual cost
-            </p>
+            <p className="text-xs text-white/60">Projected annual cost</p>
           </CardContent>
         </Card>
 
-        <Card className="sm:col-span-2 lg:col-span-1">
+        {/* Active */}
+        <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl shadow-lg hover:scale-[1.02] transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Subscriptions
-            </CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm text-white/60">Active Subscriptions</CardTitle>
+            <Calendar className="h-4 w-4 text-white/60" />
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">
+
+          <CardContent>
+            <div className="text-2xl font-bold text-white">
               {stats.activeCount}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/60">
               {subscriptions.length - stats.activeCount} paused or expired
             </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Bottom Section */}
       <div className="grid gap-6 lg:grid-cols-3">
+
         {/* Upcoming Payments */}
-        <Card className="lg:col-span-1">
+        <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl shadow-lg lg:col-span-1">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Upcoming Payments</CardTitle>
+              <CardTitle className="text-white">Upcoming Payments</CardTitle>
+
               <Link href="/upcoming">
-                <Button variant="ghost" size="sm" className="gap-1 text-xs">
+                <Button variant="ghost" size="sm" className="gap-1 text-xs text-white hover:bg-white/10 hover:text-white">
                   View all
                   <ArrowRight className="h-3 w-3" />
                 </Button>
               </Link>
             </div>
-            <CardDescription>Due in the next 7 days</CardDescription>
+
+            <CardDescription className="text-white/60">
+              Due in the next 7 days
+            </CardDescription>
           </CardHeader>
-          <CardContent className="pt-0">
+
+          <CardContent>
             {upcomingPayments.length > 0 ? (
               <div className="space-y-1">
                 {upcomingPayments.map((sub) => (
-                  <SubscriptionItem
-                    key={sub.id}
-                    subscription={sub}
-                    compact
-                  />
+                  <SubscriptionItem key={sub.id} subscription={sub} compact />
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center text-muted-foreground">
-                <Calendar className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                <p className="text-sm">No upcoming payments this week</p>
+              <div className="py-10 text-center text-white/60">
+                <Calendar className="mx-auto mb-3 h-10 w-10 opacity-40" />
+                <p>No upcoming payments</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Subscriptions List */}
-        <Card className="lg:col-span-2">
+        {/* Subscriptions */}
+        <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl shadow-lg lg:col-span-2">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Your Subscriptions</CardTitle>
+              <CardTitle className="text-white">Your Subscriptions</CardTitle>
+
               <Link href="/subscriptions">
-                <Button variant="ghost" size="sm" className="gap-1 text-xs">
+                <Button variant="ghost" size="sm" className="gap-1 text-xs text-white hover:bg-white/10 hover:text-white">
                   View all
                   <ArrowRight className="h-3 w-3" />
                 </Button>
               </Link>
             </div>
-            <CardDescription>Manage all your active subscriptions</CardDescription>
+
+            <CardDescription className="text-white/60">
+              Manage all your active subscriptions
+            </CardDescription>
           </CardHeader>
-          <CardContent className="pt-0">
+
+          <CardContent>
             {subscriptions.length > 0 ? (
               <div className="space-y-3">
                 {subscriptions.slice(0, 5).map((sub) => (
@@ -196,12 +204,13 @@ function DashboardContent() {
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center text-muted-foreground">
-                <CreditCard className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                <p className="text-sm">No subscriptions yet</p>
+              <div className="py-10 text-center text-white/60">
+                <CreditCard className="mx-auto mb-3 h-10 w-10 opacity-40" />
+                <p>No subscriptions yet</p>
+
                 <Button
-                  variant="link"
-                  className="mt-2"
+                  variant="ghost"
+                  className="mt-3 text-white hover:bg-white/10"
                   onClick={() => setFormOpen(true)}
                 >
                   Add your first subscription

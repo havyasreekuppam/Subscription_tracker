@@ -1,176 +1,223 @@
-'use client'
+"use client";
 
-import { useState, useMemo } from 'react'
-import { Plus, Search, Filter } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { DashboardLayout } from '@/components/dashboard-layout'
-import { SubscriptionItem } from '@/components/subscription-item'
-import { SubscriptionForm } from '@/components/subscription-form'
-import { SubscriptionProvider, useSubscriptions } from '@/lib/subscription-context'
-import { categories } from '@/lib/data'
-import type { Subscription } from '@/lib/types'
-import { Empty } from '@/components/ui/empty'
-
-function SubscriptionsContent() {
-  const { subscriptions, addSubscription, updateSubscription, deleteSubscription } = useSubscriptions()
-  const [formOpen, setFormOpen] = useState(false)
-  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('all')
-  const [billingFilter, setBillingFilter] = useState('all')
-
-  const filteredSubscriptions = useMemo(() => {
-    return subscriptions.filter((sub) => {
-      const matchesSearch = sub.name.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCategory = categoryFilter === 'all' || sub.category === categoryFilter
-      const matchesBilling = billingFilter === 'all' || sub.billingCycle === billingFilter
-      return matchesSearch && matchesCategory && matchesBilling
-    })
-  }, [subscriptions, searchQuery, categoryFilter, billingFilter])
-
-  const handleEdit = (subscription: Subscription) => {
-    setEditingSubscription(subscription)
-    setFormOpen(true)
-  }
-
-  const handleFormSubmit = (data: Omit<Subscription, 'id'>) => {
-    if (editingSubscription) {
-      updateSubscription(editingSubscription.id, data)
-    } else {
-      addSubscription(data)
-    }
-    setEditingSubscription(null)
-  }
-
-  const handleFormClose = (open: boolean) => {
-    setFormOpen(open)
-    if (!open) {
-      setEditingSubscription(null)
-    }
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Subscriptions</h1>
-          <p className="text-muted-foreground">Manage all your subscriptions</p>
-        </div>
-        <Button onClick={() => setFormOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Subscription
-        </Button>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search subscriptions..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={billingFilter} onValueChange={setBillingFilter}>
-                <SelectTrigger className="w-[130px]">
-                  <SelectValue placeholder="Billing" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Cycles</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="yearly">Yearly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Subscriptions List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Subscriptions</CardTitle>
-          <CardDescription>
-            {filteredSubscriptions.length} subscription{filteredSubscriptions.length !== 1 ? 's' : ''} found
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {filteredSubscriptions.length > 0 ? (
-            <div className="space-y-3">
-              {filteredSubscriptions.map((sub) => (
-                <SubscriptionItem
-                  key={sub.id}
-                  subscription={sub}
-                  onEdit={handleEdit}
-                  onDelete={deleteSubscription}
-                />
-              ))}
-            </div>
-          ) : (
-            <Empty
-              title="No subscriptions found"
-              description={
-                searchQuery || categoryFilter !== 'all' || billingFilter !== 'all'
-                  ? 'Try adjusting your filters'
-                  : 'Add your first subscription to get started'
-              }
-            >
-              {!searchQuery && categoryFilter === 'all' && billingFilter === 'all' && (
-                <Button onClick={() => setFormOpen(true)} className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Subscription
-                </Button>
-              )}
-            </Empty>
-          )}
-        </CardContent>
-      </Card>
-
-      <SubscriptionForm
-        open={formOpen}
-        onOpenChange={handleFormClose}
-        subscription={editingSubscription}
-        onSubmit={handleFormSubmit}
-      />
-    </div>
-  )
-}
+import { useState, useEffect } from "react";
+import { Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function SubscriptionsPage() {
-  return (
-    <SubscriptionProvider>
-      <DashboardLayout>
-        <SubscriptionsContent />
-      </DashboardLayout>
-    </SubscriptionProvider>
-  )
+  const router = useRouter();
+
+  // ✅ All states INSIDE component
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [name, setName] = useState("");
+  const [cost, setCost] = useState("");
+
+  const [billingCycle, setBillingCycle] = useState("monthly");
+  const [nextBillingDate, setNextBillingDate] = useState("");
+  const [category, setCategory] = useState("");
+
+  // 🔐 Protect route
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    }
+  }, [router]);
+
+  // 📦 Fetch data
+  const fetchSubscriptions = async () => {
+    const token = localStorage.getItem("token");
+
+
+    try {
+      const res = await fetch("http://localhost:5000/api/subscriptions", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      setSubscriptions(data);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+
+
+  };
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
+
+  // ➕ Add
+  const handleAdd = async () => {
+    if (!name || !cost) return;
+
+
+    const token = localStorage.getItem("token");
+
+    await fetch("http://localhost:5000/api/subscriptions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        name,
+        cost,
+        billingCycle,
+        nextBillingDate,
+        category,
+      }),
+    });
+
+    setName("");
+    setCost("");
+    setBillingCycle("monthly");
+    setNextBillingDate("");
+    setCategory("");
+
+    fetchSubscriptions();
+
+
+  };
+
+  // ❌ Delete
+  const handleDelete = async (id: string) => {
+    const token = localStorage.getItem("token");
+
+
+    await fetch(`http://localhost:5000/api/subscriptions/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    fetchSubscriptions();
+
+
+  };
+
+  return (<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0f2c] via-[#0f172a] to-black px-4">
+
+
+    {/* Glow */}
+    <div className="absolute w-[400px] h-[400px] bg-blue-500/20 blur-3xl rounded-full top-10 left-10"></div>
+    <div className="absolute w-[300px] h-[300px] bg-purple-500/20 blur-3xl rounded-full bottom-10 right-10"></div>
+
+    {/* Glass Container */}
+    <div className="relative w-full max-w-2xl p-8 rounded-2xl 
+    bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl">
+
+      {/* Heading */}
+      <h1 className="text-2xl font-bold text-white mb-2">
+        Subscriptions
+      </h1>
+      <p className="text-white/60 mb-6">
+        Manage your subscriptions
+      </p>
+
+      {/* ✅ SINGLE CLEAN FORM */}
+      <div className="flex flex-col gap-3 mb-6">
+
+        <div className="flex flex-col gap-3 mb-6">
+
+          <Input
+            placeholder="Subscription name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+          />
+
+          <Input
+            placeholder="Cost"
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+          />
+
+          <select
+            value={billingCycle}
+            onChange={(e) => setBillingCycle(e.target.value)}
+            className="bg-white/5 border border-white/10 text-white rounded-md px-3 py-2"
+
+          >
+
+            ```
+            <option value="monthly">Monthly</option>
+            ```
+
+            ```
+            <option value="yearly">Yearly</option>
+            ```
+
+          </select>
+
+          <Input
+            type="date"
+            value={nextBillingDate}
+            onChange={(e) => setNextBillingDate(e.target.value)}
+            className="bg-white/5 border-white/10 text-white"
+          />
+
+          <Input
+            placeholder="Category (e.g. Entertainment)"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+          />
+
+          <Button onClick={handleAdd} className="gap-2 mt-2">
+            <Plus className="h-4 w-4" />
+            Add Subscription
+          </Button>
+
+        </div>
+
+      </div>
+
+      {/* List */}
+      <div className="space-y-3">
+        {subscriptions.length === 0 ? (
+          <p className="text-white/50 text-sm text-center py-6">
+            No subscriptions yet
+          </p>
+        ) : (
+          subscriptions.map((sub) => (
+            <div
+              key={sub._id}
+              className="flex items-center justify-between p-4 rounded-xl
+            bg-white/[0.03] border border-white/10 backdrop-blur-lg
+            hover:bg-white/[0.05] transition"
+            >
+              <div>
+                <p className="text-white font-medium">{sub.name}</p>
+                <p className="text-sm text-white/60">
+                  ₹{sub.cost} • {sub.billingCycle}
+                </p>
+                <p className="text-xs text-white/40">
+                  {sub.category} • {new Date(sub.nextBillingDate).toDateString()}
+                </p>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => handleDelete(sub._id)}
+                className="text-red-400 hover:bg-white/10"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  </div>
+
+
+  );
 }

@@ -44,7 +44,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto',
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-white/5 backdrop-blur-xl border-r border-white/10 transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto",
           open ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -54,7 +54,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <CreditCard className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-semibold text-sidebar-foreground">SubTracker</span>
+            <span className="text-lg font-semibold text-white">SubTracker</span>
           </Link>
           <Button
             variant="ghost"
@@ -80,8 +80,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                     className={cn(
                       'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                       isActive
-                        ? 'bg-sidebar-accent text-sidebar-primary'
-                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                        ? 'bg-white/10 text-white'
+                        : 'text-white/60 hover:bg-white/10 hover:text-white'
                     )}
                   >
                     <item.icon className={cn('h-5 w-5', isActive ? 'text-sidebar-primary' : '')} />
@@ -95,7 +95,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         {/* Footer */}
         <div className="border-t border-sidebar-border p-4">
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-white/40 text-center">
             SubTracker v1.0
           </p>
         </div>
