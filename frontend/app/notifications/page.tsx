@@ -6,7 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { SubscriptionProvider, useSubscriptions } from '@/lib/subscription-context'
-import { Empty } from '@/components/ui/empty'
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 import { cn } from '@/lib/utils'
 
 function NotificationsContent() {
@@ -39,76 +44,71 @@ function NotificationsContent() {
   const getIconColor = (type: string) => {
     switch (type) {
       case 'payment':
-        return 'text-primary bg-primary/10'
+        return 'text-primary'
       case 'alert':
-        return 'text-warning bg-warning/10'
+        return 'text-yellow-400'
       case 'info':
-        return 'text-muted-foreground bg-muted'
+        return 'text-blue-400'
       default:
-        return 'text-muted-foreground bg-muted'
+        return 'text-white/70'
     }
   }
 
   return (
     <div className="space-y-6">
+
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
-          <p className="text-muted-foreground">
-            Stay updated with your subscription alerts
-          </p>
+          <h1 className="text-2xl font-bold text-white">Notifications</h1>
+          <p className="text-white/60">Stay updated with your subscription alerts</p>
         </div>
+
         {unreadCount > 0 && (
-          <Button variant="outline" onClick={clearAllNotifications} className="gap-2">
+          <Button
+            variant="outline"
+            onClick={clearAllNotifications}
+            className="gap-2 border-white/20 text-white hover:bg-white/10"
+          >
             <CheckCheck className="h-4 w-4" />
             Mark all as read
           </Button>
         )}
       </div>
 
-      {/* Notification Stats */}
+      {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Unread
-            </CardTitle>
-            <Bell className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle>Unread</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">{unreadCount}</div>
-            <p className="text-xs text-muted-foreground">Notifications</p>
+          <CardContent>
+            <div className="text-2xl font-bold">{unreadCount}</div>
+            <p className="text-white/60 text-sm">Notifications</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Payment Reminders
-            </CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle>Payment Reminders</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">
+          <CardContent>
+            <div className="text-2xl font-bold">
               {notifications.filter(n => n.type === 'payment').length}
             </div>
-            <p className="text-xs text-muted-foreground">Upcoming payments</p>
+            <p className="text-white/60 text-sm">Upcoming payments</p>
           </CardContent>
         </Card>
 
-        <Card className="sm:col-span-2 lg:col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Alerts
-            </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+        <Card>
+          <CardHeader>
+            <CardTitle>Alerts</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">
+          <CardContent>
+            <div className="text-2xl font-bold">
               {notifications.filter(n => n.type === 'alert').length}
             </div>
-            <p className="text-xs text-muted-foreground">Important alerts</p>
+            <p className="text-white/60 text-sm">Important alerts</p>
           </CardContent>
         </Card>
       </div>
@@ -118,27 +118,28 @@ function NotificationsContent() {
         <CardHeader>
           <CardTitle>All Notifications</CardTitle>
           <CardDescription>
-            {notifications.length} notification{notifications.length !== 1 ? 's' : ''}
+            {notifications.length} notification{notifications.length !== 1 && 's'}
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           {notifications.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {notifications.map((notification) => {
                 const Icon = getIcon(notification.type)
+
                 return (
                   <div
                     key={notification.id}
-                    className={cn(
-                      'flex items-start gap-4 rounded-lg border p-4 transition-colors',
-                      notification.read
-                        ? 'bg-card border-border'
-                        : 'bg-primary/5 border-primary/20'
-                    )}
+                    className="flex items-start gap-4 rounded-xl border border-white/10 p-4 
+bg-white/5 backdrop-blur-xl text-white transition-all hover:bg-white/10"
                   >
-                    <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', getIconColor(notification.type))}>
-                      <Icon className="h-5 w-5" />
+                    {/* Icon */}
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
+                      <Icon className={cn('h-5 w-5', getIconColor(notification.type))} />
                     </div>
+
+                    {/* Content */}
                     <div className="flex-1 space-y-1">
                       <div className="flex items-start justify-between gap-2">
                         <div>
@@ -148,26 +149,31 @@ function NotificationsContent() {
                           )}>
                             {notification.title}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+
+                          <p className="text-sm text-white/60">
                             {notification.description}
                           </p>
                         </div>
+
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-white/50">
                             {formatTimestamp(notification.timestamp)}
                           </span>
+
                           {!notification.read && (
-                            <Badge className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0">
+                            <Badge className="bg-primary text-white text-xs px-2 py-0.5">
                               New
                             </Badge>
                           )}
                         </div>
                       </div>
+
+                      {/* Action */}
                       {!notification.read && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 px-2 text-xs"
+                          className="h-7 px-2 text-xs text-white/70 hover:bg-white/10"
                           onClick={() => markNotificationAsRead(notification.id)}
                         >
                           <Check className="mr-1 h-3 w-3" />
@@ -180,10 +186,17 @@ function NotificationsContent() {
               })}
             </div>
           ) : (
-            <Empty
-              title="No notifications"
-              description="You're all caught up!"
-            />
+            <Empty className="bg-white/5 border-white/10 backdrop-blur-xl text-white">
+              <EmptyHeader>
+                <EmptyTitle className="text-white">
+                  No notifications
+                </EmptyTitle>
+
+                <EmptyDescription className="text-white/40">
+                  You're all caught up!
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </CardContent>
       </Card>

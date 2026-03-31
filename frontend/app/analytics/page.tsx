@@ -68,27 +68,27 @@ function AnalyticsContent() {
   }, [subscriptions])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-        <p className="text-muted-foreground">Insights into your subscription spending</p>
+        <h1 className="text-2xl font-bold text-white">Analytics</h1>
+        <p className="text-white/60">Insights into your subscription spending</p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-white/50">
               Total Monthly Spending
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-white/50" />
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">
+            <div className="text-2xl font-bold text-white">
               ${stats.monthlySpending.toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/50">
               Across all active subscriptions
             </p>
           </CardContent>
@@ -96,16 +96,16 @@ function AnalyticsContent() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-white/50">
               Average Subscription Cost
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-white/50" />
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">
+            <div className="text-2xl font-bold text-white">
               ${stats.avgCost.toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/50">
               Per subscription monthly
             </p>
           </CardContent>
@@ -113,16 +113,16 @@ function AnalyticsContent() {
 
         <Card className="sm:col-span-2 lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-white/50">
               Number of Categories
             </CardTitle>
-            <Layers className="h-4 w-4 text-muted-foreground" />
+            <Layers className="h-4 w-4 text-white/50" />
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">
+            <div className="text-2xl font-bold text-white">
               {stats.categoryCount}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/50">
               Different categories tracked
             </p>
           </CardContent>
@@ -136,7 +136,7 @@ function AnalyticsContent() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              <CardTitle>Spending Trend</CardTitle>
+              <CardTitle className="text-white">Spending Trend</CardTitle>
             </div>
             <CardDescription>Monthly spending over the last 6 months</CardDescription>
           </CardHeader>
@@ -184,7 +184,7 @@ function AnalyticsContent() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <PieChart className="h-5 w-5 text-primary" />
-              <CardTitle>Category Distribution</CardTitle>
+              <CardTitle className="text-white">Category Distribution</CardTitle>
             </div>
             <CardDescription>Spending breakdown by category</CardDescription>
           </CardHeader>
@@ -217,7 +217,7 @@ function AnalyticsContent() {
                     verticalAlign="bottom"
                     height={36}
                     formatter={(value) => (
-                      <span className="text-sm text-foreground">{value}</span>
+                      <span className="text-sm text-white/70">{value}</span>
                     )}
                   />
                 </RechartsPieChart>
@@ -230,7 +230,7 @@ function AnalyticsContent() {
       {/* Category Breakdown */}
       <Card>
         <CardHeader>
-          <CardTitle>Category Breakdown</CardTitle>
+          <CardTitle className="text-white">Category Breakdown</CardTitle>
           <CardDescription>Detailed spending by category</CardDescription>
         </CardHeader>
         <CardContent>
@@ -245,7 +245,7 @@ function AnalyticsContent() {
                         className="h-3 w-3 rounded-full"
                         style={{ backgroundColor: category.color }}
                       />
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-sm text-white/70">
                         {category.name}
                       </span>
                     </div>
@@ -253,7 +253,7 @@ function AnalyticsContent() {
                       <span className="text-sm font-semibold text-foreground">
                         ${category.value.toFixed(2)}
                       </span>
-                      <span className="ml-2 text-xs text-muted-foreground">
+                      <span className="ml-2 text-xs text-white/50">
                         ({percentage.toFixed(1)}%)
                       </span>
                     </div>

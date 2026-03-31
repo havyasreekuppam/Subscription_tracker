@@ -13,6 +13,7 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -53,40 +54,21 @@ export function SubscriptionItem({
   compact = false,
 }: SubscriptionItemProps) {
 
-  // ✅ FIX 1: Restore Icon
   const Icon = iconMap[subscription.icon] || Code
 
-  // ✅ Logo mapping
+  // ✅ SMART LOGO FUNCTION
+  const getLogo = (name: string) => {
+    const clean = name.toLowerCase().replace(/[^a-z0-9 ]/g, '')
+    const keyword = clean.split(' ')[0]
 
-
-  // ✅ FIX 2: Smart logo detection
-
-  const getLogoUrl = (name: string) => {
-    const knownDomains: Record<string, string> = {
-      github: 'github.com',
-      adobe: 'adobe.com',
-      figma: 'figma.com',
-      spotify: 'spotify.com',
-      netflix: 'netflix.com',
-      leetcode: 'leetcode.com',
+    return {
+      primary: `https://logo.clearbit.com/${keyword}.com`,
+      fallback: `https://icons.duckduckgo.com/ip3/${keyword}.com.ico`,
     }
-
-    const key = Object.keys(knownDomains).find(k =>
-      name.toLowerCase().includes(k)
-    )
-
-    if (key) {
-      return `https://logo.clearbit.com/${knownDomains[key]}`
-    }
-
-    // fallback (auto-generate)
-    const domain = name
-      .toLowerCase()
-      .replace(/\s+/g, '')
-      .replace(/[^a-z0-9]/g, '')
-
-    return `https://logo.clearbit.com/${domain}.com`
   }
+
+  const { primary, fallback } = getLogo(subscription.name)
+  const [logoSrc, setLogoSrc] = useState(primary)
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -107,14 +89,10 @@ export function SubscriptionItem({
   const daysUntil = getDaysUntil(subscription.nextBillingDate)
   const isUrgent = daysUntil <= 3 && daysUntil >= 0
 
-  // 🔹 COMPACT VERSION
+  // ✅ COMPACT
   if (compact) {
     return (
-      <div
-        className="flex items-center justify-between py-3 px-4 rounded-lg
-        bg-white/[0.03] backdrop-blur-xl border border-white/10
-        hover:bg-white/[0.06] transition-all duration-200"
-      >
+      <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.06] transition-all duration-200">
         <div className="flex items-center gap-3">
           <div
             className="flex h-9 w-9 items-center justify-center rounded-lg"
@@ -148,42 +126,29 @@ export function SubscriptionItem({
     )
   }
 
-  // 🔹 FULL CARD VERSION
+  // ✅ FULL CARD
   return (
-    <div
-      className="flex items-center justify-between p-4 rounded-xl
-      bg-white/[0.02] backdrop-blur-xl border border-white/10
-      hover:bg-white/[0.04] transition-all duration-300"
-    >
+    <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] backdrop-blur-xl border border-white/10 hover:bg-white/[0.04] transition-all duration-300">
+
       <div className="flex items-center gap-4">
         <div
-          className="flex h-12 w-12 items-center justify-center rounded-xl"
+          className="flex h-12 w-12 items-center justify-center rounded-xl overflow-hidden"
           style={{ backgroundColor: `${subscription.color}08` }}
         >
-          {(() => {
-            const logoUrl = getLogoUrl(subscription.name)
-
-            return (
-              <Image
-                src={logoUrl}
-                alt={subscription.name}
-                width={24}
-                height={24}
-                className="object-contain"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.style.display = 'none'
-
-                  const parent = target.parentElement
-                  if (parent) {
-                    parent.innerHTML = `<span style="color: ${subscription.color}; font-size: 12px; font-weight: bold;">
-            ${subscription.name.slice(0, 2).toUpperCase()}
-          </span>`
-                  }
-                }}
-              />
-            )
-          })()}
+          <Image
+            src={logoSrc}
+            alt={subscription.name}
+            width={28}
+            height={28}
+            className="object-contain"
+            onError={() => {
+              if (logoSrc !== fallback) {
+                setLogoSrc(fallback)
+              } else {
+                setLogoSrc('/fallback.png')
+              }
+            }}
+          />
         </div>
 
         <div>
@@ -233,10 +198,7 @@ export function SubscriptionItem({
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent
-            align="end"
-            className="bg-white/10 backdrop-blur-xl border border-white/10 text-white"
-          >
+          <DropdownMenuContent className="bg-white/10 backdrop-blur-xl border border-white/10 text-white">
             <DropdownMenuItem onClick={() => onEdit?.(subscription)}>
               <Pencil className="h-4 w-4 mr-2" />
               Edit
