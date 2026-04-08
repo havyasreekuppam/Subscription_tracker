@@ -43,11 +43,27 @@ function SettingsContent() {
 
   // 🔥 Load saved image + user
   useEffect(() => {
-
-    // Load image from localStorage
     const savedImage = localStorage.getItem("profileImage")
-    if (savedImage) {
+    let savedImageIsValid = false
+
+    if (savedImage && !savedImage.startsWith("blob:")) {
       setImage(savedImage)
+      savedImageIsValid = true
+    } else if (savedImage && savedImage.startsWith("blob:")) {
+      localStorage.removeItem("profileImage")
+    }
+
+    const savedPreferences = localStorage.getItem("subscriptionPreferences")
+    if (savedPreferences) {
+      try {
+        const parsed = JSON.parse(savedPreferences)
+        setPreferences((current) => ({
+          ...current,
+          ...parsed,
+        }))
+      } catch {
+        localStorage.removeItem("subscriptionPreferences")
+      }
     }
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -59,13 +75,23 @@ function SettingsContent() {
             '',
           email: user.email || '',
         })
+
+        if (!savedImageIsValid && user.photoURL) {
+          setImage(user.photoURL)
+        }
       }
     })
 
     return () => unsubscribe()
   }, [])
 
+  const savePreferences = (nextPreferences: typeof preferences) => {
+    setPreferences(nextPreferences)
+    localStorage.setItem("subscriptionPreferences", JSON.stringify(nextPreferences))
+  }
+
   const handleSave = () => {
+    localStorage.setItem("subscriptionPreferences", JSON.stringify(preferences))
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -74,14 +100,18 @@ function SettingsContent() {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const imageUrl = URL.createObjectURL(file)
-      setImage(imageUrl)
+      const reader = new FileReader()
+      reader.onload = () => {
+        const imageUrl = reader.result as string
+        setImage(imageUrl)
 
-      // ✅ Save in localStorage
-      localStorage.setItem("profileImage", imageUrl)
-      window.dispatchEvent(new Event("profileImageUpdated"));
+        // ✅ Save in localStorage
+        localStorage.setItem("profileImage", imageUrl)
+        window.dispatchEvent(new Event("profileImageUpdated"))
 
-      setShowModal(false)
+        setShowModal(false)
+      }
+      reader.readAsDataURL(file)
     }
   }
 
@@ -221,7 +251,7 @@ function SettingsContent() {
                   setPreferences({ ...preferences, currency: value })
                 }
               >
-                <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectTrigger className="w-full sm:w-50">
                   <SelectValue />
                 </SelectTrigger>
 
@@ -270,7 +300,7 @@ function SettingsContent() {
               <Switch
                 checked={preferences.notifications}
                 onCheckedChange={(checked) =>
-                  setPreferences({ ...preferences, notifications: checked })
+                  savePreferences({ ...preferences, notifications: checked })
                 }
               />
             </div>
@@ -290,7 +320,7 @@ function SettingsContent() {
               <Switch
                 checked={preferences.emailReminders}
                 onCheckedChange={(checked) =>
-                  setPreferences({ ...preferences, emailReminders: checked })
+                  savePreferences({ ...preferences, emailReminders: checked })
                 }
               />
             </div>
@@ -310,7 +340,7 @@ function SettingsContent() {
               <Switch
                 checked={preferences.weeklyReport}
                 onCheckedChange={(checked) =>
-                  setPreferences({ ...preferences, weeklyReport: checked })
+                  savePreferences({ ...preferences, weeklyReport: checked })
                 }
               />
             </div>

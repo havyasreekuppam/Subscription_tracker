@@ -43,8 +43,11 @@ export function Navbar({ onMenuClick }: NavbarProps) {
   useEffect(() => {
     const loadImage = () => {
       const savedImage = localStorage.getItem("profileImage");
-      if (savedImage) {
+      if (savedImage && !savedImage.startsWith("blob:")) {
         setProfileImage(savedImage);
+      } else if (savedImage && savedImage.startsWith("blob:")) {
+        localStorage.removeItem("profileImage");
+        setProfileImage(null);
       }
     };
 
@@ -55,6 +58,12 @@ export function Navbar({ onMenuClick }: NavbarProps) {
       window.removeEventListener("profileImageUpdated", loadImage);
     };
   }, []);
+
+  useEffect(() => {
+    if (!profileImage && user?.photoURL) {
+      setProfileImage(user.photoURL)
+    }
+  }, [profileImage, user]);
 
   // 🔥 Logout
   const handleLogout = async () => {
@@ -112,7 +121,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center 
-                rounded-full bg-gradient-to-r from-purple-500 to-pink-500 
+                rounded-full bg-linear-to-r from-purple-500 to-pink-500 
                 text-[10px] font-medium text-white">
                {unreadCount}
               </span>
@@ -131,7 +140,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                     className="h-8 w-8 rounded-full object-cover"
                   />
                 ) : (
-                  <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm">
+                  <AvatarFallback className="bg-linear-to-r from-purple-500 to-pink-500 text-white text-sm">
                     {initials}
                   </AvatarFallback>
                 )}
