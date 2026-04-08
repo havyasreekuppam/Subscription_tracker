@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // ✅ prevent multiple clicks
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -19,10 +20,12 @@ export default function LoginPage() {
     password: "",
   });
 
+  // ✅ EMAIL LOGIN
   const handleLogin = async (e: any) => {
     e.preventDefault();
 
-    console.log("🔥 LOGIN CLICKED"); // ✅ DEBUG
+    if (loading) return;
+    setLoading(true);
 
     try {
       const userCred = await signInWithEmailAndPassword(
@@ -38,14 +41,19 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error(error);
       alert(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // ✅ GOOGLE LOGIN (FIXED)
   const handleGoogleLogin = async () => {
-    console.log("🔥 GOOGLE LOGIN CLICKED");
+    if (loading) return;
+    setLoading(true);
 
     try {
       const provider = new GoogleAuthProvider();
+
       const result = await signInWithPopup(auth, provider);
 
       const token = await result.user.getIdToken();
@@ -53,17 +61,25 @@ export default function LoginPage() {
 
       router.push("/");
     } catch (error: any) {
-      console.error(error);
-
-      if (error.code !== "auth/popup-closed-by-user") {
-        alert(error.message);
+      // ✅ IGNORE expected popup errors
+      if (
+        error.code === "auth/cancelled-popup-request" ||
+        error.code === "auth/popup-closed-by-user"
+      ) {
+        console.log("Popup cancelled, ignore");
+        return;
       }
+
+      console.error("Login error:", error);
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#070a12] font-[Arial]">
-
+      
       {/* BACKGROUND */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0b0f1a] via-[#070a12] to-[#05070d]" />
 
@@ -73,8 +89,8 @@ export default function LoginPage() {
       {/* LIGHT BEAM */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[140px] h-[500px] bg-gradient-to-b from-[#7b8cff]/50 to-transparent blur-2xl" />
 
-      {/* ✅ FIXED VIGNETTE (important fix) */}
-      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+      {/* VIGNETTE */}
+      <div className="absolute inset-0 bg-black/40" />
 
       {/* FORM CARD */}
       <form
@@ -96,9 +112,10 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={handleGoogleLogin}
+          disabled={loading}
           className="w-full mb-4 py-3 rounded-[10px]
           bg-white/5 border border-white/10 text-white
-          flex items-center justify-center gap-2 hover:bg-white/10 transition"
+          flex items-center justify-center gap-2 hover:bg-white/10 transition disabled:opacity-50"
         >
           <span>🌐</span>
           Continue with Google
@@ -115,7 +132,6 @@ export default function LoginPage() {
         <label className="text-sm text-white/70">Email</label>
         <input
           type="email"
-          value={formData.email}
           placeholder="you@example.com"
           className="w-full mt-1 mb-4 px-4 py-3 rounded-[10px]
           bg-white/5 border border-white/10 text-white outline-none"
@@ -129,7 +145,6 @@ export default function LoginPage() {
         <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
-            value={formData.password}
             placeholder="Enter your password"
             className="w-full mt-1 mb-6 px-4 py-3 rounded-[10px]
             bg-white/5 border border-white/10 text-white outline-none"
@@ -148,11 +163,13 @@ export default function LoginPage() {
         {/* BUTTON */}
         <button
           type="submit"
+          disabled={loading}
           className="w-full py-3 rounded-[12px] text-white font-medium
           bg-gradient-to-r from-[#5a6cff] to-[#7b5cff]
-          shadow-[0_10px_40px_rgba(90,108,255,0.6)]"
+          shadow-[0_10px_40px_rgba(90,108,255,0.6)]
+          disabled:opacity-50"
         >
-          Sign In
+          {loading ? "Loading..." : "Sign In"}
         </button>
 
         {/* LINK */}
